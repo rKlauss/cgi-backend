@@ -17,4 +17,8 @@ public class SeatService {
         List<Seat> availableSeats = seatRepository.findByFlightIdAndIsOccupiedFalse(flightId);
         return availableSeats.stream().limit(numberOfTickets).collect(Collectors.toList());
     }
+
+    public List<Seat> getSeatPlan(Long flightId) {
+        return seatRepository.findByFlightId(flightId);
+    }
 }

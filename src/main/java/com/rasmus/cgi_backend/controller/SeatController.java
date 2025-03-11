@@ -17,4 +17,9 @@ public class SeatController {
     public List<Seat> recommendSeats(@RequestParam Long flightId, @RequestParam int numberOfTickets) {
         return seatService.recommendSeats(flightId, numberOfTickets);
     }
+
+    @GetMapping("/plan")
+    public List<Seat> getSeatPlan(@RequestParam Long flightId) {
+        return seatService.getSeatPlan(flightId);
+    }
 }

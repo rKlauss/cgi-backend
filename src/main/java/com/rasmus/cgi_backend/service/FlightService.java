@@ -1,7 +1,9 @@
 package com.rasmus.cgi_backend.service;
 
 import com.rasmus.cgi_backend.model.Flight;
+import com.rasmus.cgi_backend.model.Seat;
 import com.rasmus.cgi_backend.repository.FlightRepository;
+import com.rasmus.cgi_backend.repository.SeatRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FlightService {
     private final FlightRepository flightRepository;
+    private final SeatRepository seatRepository;
     private final List<String> locations = Arrays.asList("Tallinn", "Helsingi", "Saaremaa", "Sofia");
 
     @PostConstruct
@@ -23,11 +26,24 @@ public class FlightService {
         for (String origin : locations) {
             for (String destination : locations) {
                 if (!origin.equals(destination)) {
-                    flights.add(new Flight(null, origin, destination, LocalDateTime.now().plusHours((int) (Math.random() * 10)), 50 + Math.random() * 100, null));
+                    Flight flight = new Flight(null, origin, destination, LocalDateTime.now().plusHours((int) (Math.random() * 10)), 50 + Math.random() * 100, new ArrayList<>());
+                    flights.add(flight);
+                    flightRepository.save(flight);
+                    generateSeatsForFlight(flight);
                 }
             }
         }
-        flightRepository.saveAll(flights);
+    }
+
+    private void generateSeatsForFlight(Flight flight) {
+        List<Seat> seats = new ArrayList<>();
+        String[] seatColumns = {"A", "B", "C", "D", "E", "F"};
+        for (int row = 1; row <= 10; row++) {
+            for (String column : seatColumns) {
+                seats.add(new Seat(null, row + column, Math.random() < 0.3, column.equals("A") || column.equals("F"), row == 1 || row == 10, row <= 2, flight));
+            }
+        }
+        seatRepository.saveAll(seats);
     }
 
     public List<Flight> searchFlights(String origin, String destination) {
