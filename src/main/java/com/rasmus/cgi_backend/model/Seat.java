@@ -3,10 +3,7 @@ package com.rasmus.cgi_backend.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -22,6 +19,8 @@ public class Seat {
     private boolean isWindow;
     private boolean hasExtraLegroom;
     private boolean isNearExit;
+    private boolean isBusinessClass;
+    private double price;
 
     @ManyToOne
     @JoinColumn(name = "flight_id")

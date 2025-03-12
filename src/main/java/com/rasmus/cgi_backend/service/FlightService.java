@@ -7,11 +7,9 @@ import com.rasmus.cgi_backend.repository.SeatRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.time.*;
+import java.util.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,31 +20,60 @@ public class FlightService {
 
     @PostConstruct
     public void initFlights() {
+        seatRepository.deleteAll();
+        flightRepository.deleteAll();
         List<Flight> flights = new ArrayList<>();
         for (String origin : locations) {
             for (String destination : locations) {
                 if (!origin.equals(destination)) {
-                    Flight flight = new Flight(null, origin, destination, LocalDateTime.now().plusHours((int) (Math.random() * 10)), 50 + Math.random() * 100, new ArrayList<>());
+                    double basePrice = Math.round((50 + Math.random() * 100) * 10) / 10.0;
+                    LocalDate departureDate = LocalDate.now().plusDays((int) (Math.random() * 10));
+                    LocalDateTime departureTime = departureDate.atTime(LocalTime.of((int) (Math.random() * 24), (int) (Math.random() * 60)));
+                    Flight flight = new Flight(null, origin, destination, departureDate, departureTime, basePrice, new ArrayList<>());
                     flights.add(flight);
                     flightRepository.save(flight);
-                    generateSeatsForFlight(flight);
+                    generateSeatsForFlight(flight, basePrice);
                 }
             }
         }
     }
 
-    private void generateSeatsForFlight(Flight flight) {
+    private void generateSeatsForFlight(Flight flight, double basePrice) {
         List<Seat> seats = new ArrayList<>();
         String[] seatColumns = {"A", "B", "C", "D", "E", "F"};
         for (int row = 1; row <= 10; row++) {
+            boolean isBusinessClass = row <= 2;
+            double seatPrice = isBusinessClass ? basePrice * 2.5 : basePrice;
             for (String column : seatColumns) {
-                seats.add(new Seat(null, row + column, Math.random() < 0.3, column.equals("A") || column.equals("F"), row == 1 || row == 10, row <= 2, flight));
+                seats.add(new Seat(null, row + column, Math.random() < 0.3, column.equals("A") || column.equals("F"), row == 1 || row == 10, isBusinessClass, isBusinessClass, Math.round(seatPrice * 10) / 10.0, flight));
             }
         }
         seatRepository.saveAll(seats);
     }
 
-    public List<Flight> searchFlights(String origin, String destination) {
-        return flightRepository.findByOriginAndDestination(origin, destination);
+    public List<Flight> searchFlights(String origin, String destination, LocalDate date, Double maxPrice) {
+        return flightRepository.findAll().stream()
+                .filter(f -> (origin == null || f.getOrigin().equals(origin)) &&
+                             (destination == null || f.getDestination().equals(destination)) &&
+                             (date == null || f.getDepartureDate().equals(date)) &&
+                             (maxPrice == null || f.getPrice() <= maxPrice))
+                .toList();
+    }
+
+    public List<Seat> recommendSeats(Long flightId, boolean isWindow, boolean hasExtraLegroom, boolean isNearExit, int count) {
+        return seatRepository.findByFlightIdAndIsOccupiedFalse(flightId).stream()
+                .filter(seat -> (!isWindow || seat.isWindow()) &&
+                                (!hasExtraLegroom || seat.isHasExtraLegroom()) &&
+                                (!isNearExit || seat.isNearExit()))
+                .limit(count)
+                .toList();
+    }
+
+    public boolean bookSeats(List<Long> seatIds) {
+        List<Seat> seats = seatRepository.findAllById(seatIds);
+        if (seats.stream().anyMatch(Seat::isOccupied)) return false;
+        seats.forEach(seat -> seat.setOccupied(true));
+        seatRepository.saveAll(seats);
+        return true;
     }
 }
