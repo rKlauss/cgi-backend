@@ -23,33 +23,54 @@ public class FlightService {
         seatRepository.deleteAll();
         flightRepository.deleteAll();
         List<Flight> flights = new ArrayList<>();
+
         for (String origin : locations) {
             for (String destination : locations) {
                 if (!origin.equals(destination)) {
+                    for (int i = 0; i < 2; i++ ) { 
                     double basePrice = Math.round((50 + Math.random() * 100) * 10) / 10.0;
                     LocalDate departureDate = LocalDate.now().plusDays((int) (Math.random() * 10));
                     LocalDateTime departureTime = departureDate.atTime(LocalTime.of((int) (Math.random() * 24), (int) (Math.random() * 60)));
+                    
                     Flight flight = new Flight(null, origin, destination, departureDate, departureTime, basePrice, new ArrayList<>());
                     flights.add(flight);
                     flightRepository.save(flight);
                     generateSeatsForFlight(flight, basePrice);
+                    }
                 }
             }
         }
     }
-
+//vigane veits
     private void generateSeatsForFlight(Flight flight, double basePrice) {
         List<Seat> seats = new ArrayList<>();
         String[] seatColumns = {"A", "B", "C", "D", "E", "F"};
+        
         for (int row = 1; row <= 10; row++) {
             boolean isBusinessClass = row <= 2;
+            boolean hasExtraLegroom = isBusinessClass || row == 3; 
+            boolean isNearExit = isBusinessClass || row == 10; 
             double seatPrice = isBusinessClass ? basePrice * 2.5 : basePrice;
+    
             for (String column : seatColumns) {
-                seats.add(new Seat(null, row + column, Math.random() < 0.3, column.equals("A") || column.equals("F"), row == 1 || row == 10, isBusinessClass, isBusinessClass, Math.round(seatPrice * 10) / 10.0, flight));
+                boolean isWindow = column.equals("A") || column.equals("F");
+    
+                seats.add(new Seat(
+                    null, 
+                    row + column, 
+                    Math.random() < 0.3,
+                    isWindow,
+                    hasExtraLegroom,
+                    isNearExit, 
+                    isBusinessClass, 
+                    Math.round(seatPrice * 10) / 10.0, 
+                    flight
+                ));
             }
         }
         seatRepository.saveAll(seats);
     }
+    
 
     public List<Flight> searchFlights(String origin, String destination, LocalDate date, Double maxPrice) {
         return flightRepository.findAll().stream()
@@ -58,22 +79,5 @@ public class FlightService {
                              (date == null || f.getDepartureDate().equals(date)) &&
                              (maxPrice == null || f.getPrice() <= maxPrice))
                 .toList();
-    }
-
-    public List<Seat> recommendSeats(Long flightId, boolean isWindow, boolean hasExtraLegroom, boolean isNearExit, int count) {
-        return seatRepository.findByFlightIdAndIsOccupiedFalse(flightId).stream()
-                .filter(seat -> (!isWindow || seat.isWindow()) &&
-                                (!hasExtraLegroom || seat.isHasExtraLegroom()) &&
-                                (!isNearExit || seat.isNearExit()))
-                .limit(count)
-                .toList();
-    }
-
-    public boolean bookSeats(List<Long> seatIds) {
-        List<Seat> seats = seatRepository.findAllById(seatIds);
-        if (seats.stream().anyMatch(Seat::isOccupied)) return false;
-        seats.forEach(seat -> seat.setOccupied(true));
-        seatRepository.saveAll(seats);
-        return true;
     }
 }

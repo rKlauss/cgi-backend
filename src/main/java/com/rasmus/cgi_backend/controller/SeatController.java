@@ -15,11 +15,17 @@ public class SeatController {
 
     @GetMapping("/recommend")
     public List<Seat> recommendSeats(@RequestParam Long flightId, @RequestParam int numberOfTickets) {
-        return seatService.recommendSeats(flightId, numberOfTickets);
+        return seatService.recommendSeats(flightId, false, false, false, numberOfTickets);
     }
 
     @GetMapping("/plan")
     public List<Seat> getSeatPlan(@RequestParam Long flightId) {
         return seatService.getSeatPlan(flightId);
     }
+
+    @PostMapping("/book")
+    public boolean bookSeats(@RequestBody List<Long> seatIds) {
+    return seatService.bookSeats(seatIds);
+    }
+
 }
