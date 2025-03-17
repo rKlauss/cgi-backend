@@ -13,11 +13,6 @@ import java.util.List;
 public class SeatController {
     private final SeatService seatService;
 
-    @GetMapping("/recommend")
-    public List<Seat> recommendSeats(@RequestParam Long flightId, @RequestParam int numberOfTickets) {
-        return seatService.recommendSeats(flightId, false, false, false, numberOfTickets);
-    }
-
     @GetMapping("/plan")
     public List<Seat> getSeatPlan(@RequestParam Long flightId) {
         return seatService.getSeatPlan(flightId);

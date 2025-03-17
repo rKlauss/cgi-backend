@@ -33,15 +33,4 @@ public class FlightController {
                                      @RequestParam int count) {
         return seatService.recommendSeats(flightId, isWindow, hasExtraLegroom, isNearExit, count);
     }
-    
-    // @GetMapping("/flights/{flightId}/seats")
-    // public List<String> getFlightSeatPlan(@PathVariable Long flightId) {
-    //     return flightService.getFlightSeatPlan(flightId);
-    // }
-    
-
-    @PostMapping("/seats/book")
-    public boolean bookSeats(@RequestBody List<Long> seatIds) {
-        return seatService.bookSeats(seatIds);
-    }
 }

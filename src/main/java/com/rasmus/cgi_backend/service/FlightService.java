@@ -41,7 +41,6 @@ public class FlightService {
             }
         }
     }
-//vigane veits
     private void generateSeatsForFlight(Flight flight, double basePrice) {
         List<Seat> seats = new ArrayList<>();
         String[] seatColumns = {"A", "B", "C", "D", "E", "F"};
