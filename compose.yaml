@@ -1,9 +1,35 @@
+name: cgi_homework
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=cgi_db'
-      - 'POSTGRES_PASSWORD=123'
-      - 'POSTGRES_USER=postgres'
+  backend:
+    build: ./
+    container_name: cgi-backend
+    image: cgibackend
     ports:
-      - '5432'
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123
+    depends_on:
+      - db
+  cgi-frontend:
+    container_name: cgi-frontend
+    image: cgifrontend
+    build: ./
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:8080/
+    depends_on:
+      - backend
+  db:
+    image: postgres:latest
+    container_name: cgi_db_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+volumes:
+  db_data: {}
