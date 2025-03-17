@@ -10,9 +10,9 @@ This is a web application that allows users to select seats for a flight. The ap
 - **Business & Economy Class** – Differentiation between business and economy class seats.
 - **Seat Booking** – Users can book selected seats.
 - **Seat Filtering** – Users can filter seats based on:
-   - Window seats
-   - Extra legroom
-   - Near exit
+   - Window seats (all 'A' and 'F' row seats)
+   - Extra legroom (Business class and third row seats)
+   - Near exit (first two and last rows)
 
 ---
 
@@ -75,6 +75,7 @@ docker-compose up --build
 1. Go to http://localhost:5173
 2. Customer can choose between 4 Citys.
 3. User can test using locations, price range, date time and without any filters user can press "Search Flights" to view all flights.
+4. Choose flight and book as many seats as needed.
 
 | Citys   |
 | ------------ | 
