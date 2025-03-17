@@ -24,10 +24,10 @@ public class FlightService {
         flightRepository.deleteAll();
         List<Flight> flights = new ArrayList<>();
 
-        for (String origin : locations) {
-            for (String destination : locations) {
-                if (!origin.equals(destination)) {
-                    for (int i = 0; i < 2; i++ ) { 
+    for (String origin : locations) {
+        for (String destination : locations) {
+            if (!origin.equals(destination)) {
+                for (int i = 0; i < 2; i++ ) { 
                     double basePrice = Math.round((50 + Math.random() * 100) * 10) / 10.0;
                     LocalDate departureDate = LocalDate.now().plusDays((int) (Math.random() * 10));
                     LocalDateTime departureTime = departureDate.atTime(LocalTime.of((int) (Math.random() * 24), (int) (Math.random() * 60)));
@@ -41,6 +41,7 @@ public class FlightService {
             }
         }
     }
+
     private void generateSeatsForFlight(Flight flight, double basePrice) {
         List<Seat> seats = new ArrayList<>();
         String[] seatColumns = {"A", "B", "C", "D", "E", "F"};

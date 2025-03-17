@@ -29,6 +29,7 @@ public class SeatService {
     public List<Seat> getSeatPlan(Long flightId) {
         return seatRepository.findByFlightId(flightId);
     }
+    
     @Transactional
     public boolean bookSeats(List<Long> seatIds) {
         List<Seat> seats = seatRepository.findAllById(seatIds);
